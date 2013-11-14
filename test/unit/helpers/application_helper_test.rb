@@ -678,6 +678,35 @@ RAW
     to_test.each { |text, result| assert_equal "<p>#{result}</p>", textilizable(WikiContent.new( :text => text, :page => page ), :text) }
   end
 
+  def test_wiki_links_within_wiki_page_context_with_wiki_links_full_param
+
+    page = WikiPage.find_by_title('Another_page' )
+
+    to_test = {
+      # link to another page
+      '[[CookBook documentation]]' => '<a href="/projects/ecookbook/wiki/CookBook_documentation" class="wiki-page">CookBook documentation</a>',
+      '[[CookBook documentation|documentation]]' => '<a href="/projects/ecookbook/wiki/CookBook_documentation" class="wiki-page">documentation</a>',
+      '[[CookBook documentation#One-section]]' => '<a href="/projects/ecookbook/wiki/CookBook_documentation#One-section" class="wiki-page">CookBook documentation</a>',
+      '[[CookBook documentation#One-section|documentation]]' => '<a href="/projects/ecookbook/wiki/CookBook_documentation#One-section" class="wiki-page">documentation</a>',
+      # link to the current page
+      '[[Another page]]' => '<a href="/projects/ecookbook/wiki/Another_page" class="wiki-page">Another page</a>',
+      '[[Another page|Page]]' => '<a href="/projects/ecookbook/wiki/Another_page" class="wiki-page">Page</a>',
+      '[[Another page#anchor]]' => '<a href="/projects/ecookbook/wiki/Another_page#anchor" class="wiki-page">Another page</a>',
+      '[[Another page#anchor|Page]]' => '<a href="/projects/ecookbook/wiki/Another_page#anchor" class="wiki-page">Page</a>',
+      # page that doesn't exist
+      '[[Unknown page]]' => '<a href="/projects/ecookbook/wiki/Unknown_page?parent=Another_page" class="wiki-page new">Unknown page</a>',
+      '[[Unknown page|404]]' => '<a href="/projects/ecookbook/wiki/Unknown_page?parent=Another_page" class="wiki-page new">404</a>',
+      '[[Unknown page#anchor]]' => '<a href="/projects/ecookbook/wiki/Unknown_page?parent=Another_page#anchor" class="wiki-page new">Unknown page</a>',
+      '[[Unknown page#anchor|404]]' => '<a href="/projects/ecookbook/wiki/Unknown_page?parent=Another_page#anchor" class="wiki-page new">404</a>',
+    }
+
+    @project = Project.find(1)
+
+    to_test.each { |text, result|
+      assert_equal "<p>#{result}</p>", textilizable(WikiContent.new( :text => text, :page => page ), :text, :wiki_links=> :full )
+    }
+  end
+
   def test_wiki_links_anchor_option_should_prepend_page_title_to_href
 
     to_test = {
